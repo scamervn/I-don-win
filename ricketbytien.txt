@@ -1,0 +1,236 @@
+--// RICKET HUB FULL
+--// By Tien:)
+
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- GUI
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "RicketHub"
+
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 240, 0, 430)
+main.Position = UDim2.new(0, 20, 0.25, 0)
+main.BackgroundColor3 = Color3.fromRGB(30,30,30)
+main.Active = true
+main.Draggable = true
+
+local function createBtn(text, posY)
+	local btn = Instance.new("TextButton", main)
+	btn.Size = UDim2.new(1, -20, 0, 30)
+	btn.Position = UDim2.new(0, 10, 0, posY)
+	btn.Text = text
+	btn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	btn.TextColor3 = Color3.new(1,1,1)
+	btn.BorderSizePixel = 0
+	return btn
+end
+
+-- Buttons
+local speedBtn = createBtn("Speed", 10)
+local flyBtn = createBtn("Fly", 50)
+local noclipBtn = createBtn("Noclip", 90)
+local tpBtn = createBtn("TP Click", 130)
+local invisBtn = createBtn("Tàng Hình", 170)
+local hitboxBtn = createBtn("Hitbox", 210)
+local autoToolBtn = createBtn("Auto Cầm Tool", 250)
+local espBtn = createBtn("ESP Player", 290)
+local godBtn = createBtn("GodMode", 330)
+local infJumpBtn = createBtn("Infinite Jump", 370)
+
+-- SPEED
+local speedOn = false
+speedBtn.MouseButton1Click:Connect(function()
+	speedOn = not speedOn
+	humanoid.WalkSpeed = speedOn and 60 or 16
+end)
+
+-- FLY
+local flying = false
+flyBtn.MouseButton1Click:Connect(function()
+	flying = not flying
+	local hrp = char:WaitForChild("HumanoidRootPart")
+
+	if flying then
+		local bv = Instance.new("BodyVelocity", hrp)
+		bv.Name = "FlyBV"
+		bv.MaxForce = Vector3.new(1e5,1e5,1e5)
+		bv.Velocity = Vector3.new(0,50,0)
+	else
+		if hrp:FindFirstChild("FlyBV") then
+			hrp.FlyBV:Destroy()
+		end
+	end
+end)
+
+-- NOCLIP
+local noclip = false
+noclipBtn.MouseButton1Click:Connect(function()
+	noclip = not noclip
+end)
+
+RunService.Stepped:Connect(function()
+	if noclip then
+		for _,v in pairs(char:GetDescendants()) do
+			if v:IsA("BasePart") then
+				v.CanCollide = false
+			end
+		end
+	end
+end)
+
+-- TP CLICK
+tpBtn.MouseButton1Click:Connect(function()
+	mouse.Button1Down:Connect(function()
+		if mouse.Hit then
+			char:MoveTo(mouse.Hit.p)
+		end
+	end)
+end)
+
+-- TÀNG HÌNH
+local invis = false
+invisBtn.MouseButton1Click:Connect(function()
+	invis = not invis
+	for _,v in pairs(char:GetDescendants()) do
+		if v:IsA("BasePart") then
+			v.Transparency = invis and 1 or 0
+		end
+	end
+end)
+
+-- HITBOX
+local hitbox = false
+hitboxBtn.MouseButton1Click:Connect(function()
+	hitbox = not hitbox
+	for _,plr in pairs(game.Players:GetPlayers()) do
+		if plr ~= player and plr.Character then
+			local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.Size = hitbox and Vector3.new(10,10,10) or Vector3.new(2,2,1)
+				hrp.Transparency = hitbox and 0.5 or 1
+				hrp.CanCollide = false
+			end
+		end
+	end
+end)
+
+-- AUTO TOOL
+autoToolBtn.MouseButton1Click:Connect(function()
+	for _,tool in pairs(player.Backpack:GetChildren()) do
+		if tool:IsA("Tool") then
+			tool.Parent = char
+		end
+	end
+end)
+
+-- ESP
+local espOn = false
+local function createESP(plr)
+	if plr.Character and plr.Character:FindFirstChild("Head") then
+		local bill = Instance.new("BillboardGui", plr.Character.Head)
+		bill.Name = "ESP"
+		bill.Size = UDim2.new(0,100,0,40)
+		bill.AlwaysOnTop = true
+
+		local txt = Instance.new("TextLabel", bill)
+		txt.Size = UDim2.new(1,0,1,0)
+		txt.BackgroundTransparency = 1
+		txt.Text = plr.Name
+		txt.TextColor3 = Color3.new(1,0,0)
+	end
+end
+
+espBtn.MouseButton1Click:Connect(function()
+	espOn = not espOn
+	for _,plr in pairs(game.Players:GetPlayers()) do
+		if plr ~= player then
+			if espOn then
+				createESP(plr)
+			else
+				if plr.Character and plr.Character:FindFirstChild("Head") then
+					local esp = plr.Character.Head:FindFirstChild("ESP")
+					if esp then esp:Destroy() end
+				end
+			end
+		end
+	end
+end)
+
+-- GODMODE
+local god = false
+godBtn.MouseButton1Click:Connect(function()
+	god = not god
+	humanoid.MaxHealth = god and math.huge or 100
+	humanoid.Health = humanoid.MaxHealth
+end)
+
+-- INFINITE JUMP
+local infJump = false
+infJumpBtn.MouseButton1Click:Connect(function()
+	infJump = not infJump
+end)
+
+UIS.JumpRequest:Connect(function()
+	if infJump then
+		humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+	end
+end)
+
+-- AIMLOCK
+local aimlock = false
+local aiming = false
+local camera = workspace.CurrentCamera
+
+aimBtn.MouseButton1Click:Connect(function()
+	aimlock = not aimlock
+end)
+
+local function getClosestPlayer()
+	local closestPlayer = nil
+	local shortestDistance = math.huge
+
+	for _,plr in pairs(game.Players:GetPlayers()) do
+		if plr ~= player and plr.Character and plr.Character:FindFirstChild("Head") then
+			local head = plr.Character.Head
+			local pos, visible = camera:WorldToViewportPoint(head.Position)
+
+			if visible then
+				local distance = (Vector2.new(pos.X, pos.Y) - UIS:GetMouseLocation()).Magnitude
+				if distance < shortestDistance then
+					shortestDistance = distance
+					closestPlayer = plr
+				end
+			end
+		end
+	end
+	return closestPlayer
+end
+
+UIS.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton2 then
+		aiming = true
+	end
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton2 then
+		aiming = false
+	end
+end)
+
+RunService.RenderStepped:Connect(function()
+	if aimlock and aiming then
+		local target = getClosestPlayer()
+		if target and target.Character and target.Character:FindFirstChild("Head") then
+			camera.CFrame = CFrame.new(
+				camera.CFrame.Position,
+				target.Character.Head.Position
+			)
+		end
+	end
+end)
