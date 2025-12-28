@@ -1,0 +1,208 @@
+--// RICKET HUB - RickOnTop99
+--// Full All In One
+--// By ChatGPT
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+local cam = workspace.CurrentCamera
+
+local char = player.Character or player.CharacterAdded:Wait()
+local hum = char:WaitForChild("Humanoid")
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+-- GUI
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "RickOnTop99"
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,260,0,520)
+frame.Position = UDim2.new(0.05,0,0.2,0)
+frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+frame.Active = true
+frame.Draggable = true
+
+local layout = Instance.new("UIListLayout", frame)
+layout.Padding = UDim.new(0,5)
+
+local function makeBtn(txt)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(1,0,0,36)
+    b.Text = txt
+    b.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    b.TextColor3 = Color3.new(1,1,1)
+    b.Parent = frame
+    return b
+end
+
+-- STATES
+local speedOn, flyOn, noclipOn = false,false,false
+local espOn, hitboxOn, infJumpOn = false,false,false
+local aimOn, shiftlockOn = false,false
+local darkMode = true
+local menuOpen = true
+
+-- COLLAPSE MENU
+local fullSize = frame.Size
+local collapseSize = UDim2.new(fullSize.X.Scale,fullSize.X.Offset,0,40)
+
+makeBtn("▲ Thu gọn / Mở rộng ▼").MouseButton1Click:Connect(function()
+    menuOpen = not menuOpen
+    TweenService:Create(frame,TweenInfo.new(0.3),{
+        Size = menuOpen and fullSize or collapseSize
+    }):Play()
+end)
+
+UIS.InputBegan:Connect(function(i,gp)
+    if gp then return end
+    if i.KeyCode == Enum.KeyCode.RightShift then
+        frame.Visible = not frame.Visible
+    end
+end)
+
+-- SPEED
+makeBtn("Speed").MouseButton1Click:Connect(function()
+    speedOn = not speedOn
+    hum.WalkSpeed = speedOn and 50 or 16
+end)
+
+-- FLY
+local bv,bg
+makeBtn("Fly").MouseButton1Click:Connect(function()
+    flyOn = not flyOn
+    if flyOn then
+        bv = Instance.new("BodyVelocity",hrp)
+        bg = Instance.new("BodyGyro",hrp)
+        bv.MaxForce = Vector3.new(9e9,9e9,9e9)
+        bg.MaxTorque = Vector3.new(9e9,9e9,9e9)
+        RunService:BindToRenderStep("Fly",0,function()
+            bv.Velocity = cam.CFrame.LookVector * 60
+            bg.CFrame = cam.CFrame
+        end)
+    else
+        RunService:UnbindFromRenderStep("Fly")
+        if bv then bv:Destroy() end
+        if bg then bg:Destroy() end
+    end
+end)
+
+-- NOCLIP
+makeBtn("Noclip").MouseButton1Click:Connect(function()
+    noclipOn = not noclipOn
+end)
+
+RunService.Stepped:Connect(function()
+    if noclipOn then
+        for _,v in pairs(char:GetDescendants()) do
+            if v:IsA("BasePart") then v.CanCollide = false end
+        end
+    end
+end)
+
+-- TP CLICK
+makeBtn("TP Click").MouseButton1Click:Connect(function()
+    hrp.CFrame = CFrame.new(mouse.Hit.p + Vector3.new(0,3,0))
+end)
+
+-- GOD MODE
+makeBtn("God Mode").MouseButton1Click:Connect(function()
+    hum.MaxHealth = math.huge
+    hum.Health = math.huge
+end)
+
+-- INF JUMP
+makeBtn("Infinite Jump").MouseButton1Click:Connect(function()
+    infJumpOn = not infJumpOn
+end)
+
+UIS.JumpRequest:Connect(function()
+    if infJumpOn then
+        hum:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+-- ESP
+local espFolder = Instance.new("Folder",gui)
+makeBtn("ESP").MouseButton1Click:Connect(function()
+    espOn = not espOn
+    espFolder:ClearAllChildren()
+    if espOn then
+        for _,p in pairs(Players:GetPlayers()) do
+            if p~=player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local box = Instance.new("BoxHandleAdornment")
+                box.Size = Vector3.new(4,6,4)
+                box.Adornee = p.Character.HumanoidRootPart
+                box.AlwaysOnTop = true
+                box.Color3 = Color3.new(1,0,0)
+                box.Transparency = 0.5
+                box.Parent = espFolder
+            end
+        end
+    end
+end)
+
+-- HITBOX
+makeBtn("Hitbox").MouseButton1Click:Connect(function()
+    hitboxOn = not hitboxOn
+    for _,p in pairs(Players:GetPlayers()) do
+        if p~=player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local h = p.Character.HumanoidRootPart
+            if hitboxOn then
+                h.Size = Vector3.new(10,10,10)
+                h.Transparency = 0.5
+                h.Material = Enum.Material.Neon
+                h.CanCollide = false
+            else
+                h.Size = Vector3.new(2,2,1)
+                h.Transparency = 1
+            end
+        end
+    end
+end)
+
+-- AIMBOT / AIMLOCK
+local function getClosest()
+    local d,t = math.huge,nil
+    for _,p in pairs(Players:GetPlayers()) do
+        if p~=player and p.Character and p.Character:FindFirstChild("Head") then
+            local dist = (p.Character.Head.Position - cam.CFrame.Position).Magnitude
+            if dist < d then d=dist t=p.Character.Head end
+        end
+    end
+    return t
+end
+
+makeBtn("Aimbot / Aimlock").MouseButton1Click:Connect(function()
+    aimOn = not aimOn
+end)
+
+RunService.RenderStepped:Connect(function()
+    if aimOn then
+        local t = getClosest()
+        if t then
+            cam.CFrame = CFrame.new(cam.CFrame.Position,t.Position)
+        end
+    end
+end)
+
+-- SHIFTLOCK
+makeBtn("Shiftlock").MouseButton1Click:Connect(function()
+    shiftlockOn = not shiftlockOn
+    hum.AutoRotate = not shiftlockOn
+end)
+
+-- DARK / WHITE MODE
+makeBtn("Đổi màu Đen / Trắng").MouseButton1Click:Connect(function()
+    darkMode = not darkMode
+    frame.BackgroundColor3 = darkMode and Color3.fromRGB(20,20,20) or Color3.fromRGB(235,235,235)
+    for _,v in pairs(frame:GetChildren()) do
+        if v:IsA("TextButton") then
+            v.BackgroundColor3 = darkMode and Color3.fromRGB(40,40,40) or Color3.fromRGB(255,255,255)
+            v.TextColor3 = darkMode and Color3.new(1,1,1) or Color3.new(0,0,0)
+        end
+    end
+end)
