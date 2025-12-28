@@ -1,0 +1,145 @@
+--// GET KEY GUI - R HUB
+--// By ChatGPT
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "R_GetKey"
+
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 350, 0, 230)
+main.Position = UDim2.new(0.5, -175, 0.5, -115)
+main.BackgroundColor3 = Color3.fromRGB(20,20,20)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
+
+-- Avatar R
+local avatar = Instance.new("TextLabel", main)
+avatar.Size = UDim2.new(0, 80, 0, 80)
+avatar.Position = UDim2.new(0.5, -40, 0, 10)
+avatar.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+avatar.Text = "R"
+avatar.TextScaled = true
+avatar.Font = Enum.Font.GothamBlack
+avatar.TextColor3 = Color3.fromRGB(255,255,255)
+avatar.BorderSizePixel = 0
+avatar.Name = "Avatar"
+
+local corner = Instance.new("UICorner", avatar)
+corner.CornerRadius = UDim.new(1,0)
+
+-- Title
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Position = UDim2.new(0, 0, 0, 95)
+title.Text = "R HUB - GET KEY"
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.BackgroundTransparency = 1
+
+-- Input
+local box = Instance.new("TextBox", main)
+box.Size = UDim2.new(0.9, 0, 0, 35)
+box.Position = UDim2.new(0.05, 0, 0, 135)
+box.PlaceholderText = "Enter Key Here"
+box.Text = ""
+box.Font = Enum.Font.Gotham
+box.TextScaled = true
+box.BackgroundColor3 = Color3.fromRGB(30,30,30)
+box.TextColor3 = Color3.fromRGB(255,255,255)
+box.BorderSizePixel = 0
+
+Instance.new("UICorner", box)
+
+-- Buttons
+local function makeBtn(text, pos)
+	local b = Instance.new("TextButton", main)
+	b.Size = UDim2.new(0.42, 0, 0, 35)
+	b.Position = pos
+	b.Text = text
+	b.Font = Enum.Font.GothamBold
+	b.TextScaled = true
+	b.TextColor3 = Color3.fromRGB(255,255,255)
+	b.BackgroundColor3 = Color3.fromRGB(255,0,0)
+	b.BorderSizePixel = 0
+	Instance.new("UICorner", b)
+	return b
+end
+
+local getKey = makeBtn("GET KEY", UDim2.new(0.05,0,0,180))
+local checkKey = makeBtn("CHECK KEY", UDim2.new(0.53,0,0,180))
+
+-- KEY CONFIG
+local REAL_KEY = "RICKET-ON-TOP"
+local KEY_LINK = "https://link-hub.net/2568423/FcZY5YY6WJjB"
+
+-- Functions
+getKey.MouseButton1Click:Connect(function()
+	setclipboard(KEY_LINK)
+	game:GetService("StarterGui"):SetCore("SendNotification",{
+		Title = "R HUB",
+		Text = "Link Get Key đã copy!",
+		Duration = 3
+	})
+end)
+
+checkKey.MouseButton1Click:Connect(function()
+	if box.Text == REAL_KEY then
+		gui:Destroy()
+		game:GetService("StarterGui"):SetCore("SendNotification",{
+			Title = "R HUB",
+			Text = "Key ĐÚNG! Đang mở Hub...",
+			Duration = 3
+		})
+		-- loadstring hub ở đây
+		-- loadstring(game:HttpGet("https://raw.githubusercontent.com/scamervn/I-don-win/refs/heads/main/RickOnTop99.txt"))()
+	else
+		game:GetService("StarterGui"):SetCore("SendNotification",{
+			Title = "R HUB",
+			Text = "Key Invalid 💔!",
+			Duration = 3
+		})
+	end
+end)
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+local cam = workspace.CurrentCamera
+
+local function getChar()
+    return player.Character or player.CharacterAdded:Wait()
+end
+
+local char = getChar()
+local hum = char:WaitForChild("Humanoid")
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+-- GUI
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "RicketHub"
+
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 260, 0, 420)
+main.Position = UDim2.new(0.35, 0, 0.2, 0)
+main.BackgroundColor3 = Color3.fromRGB(25,25,25)
+main.Active = true
+main.Draggable = true
+Instance.new("UICorner", main)
+
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1,0,0,40)
+title.Text = "RICKET HUB"
+title.TextColor3 = Color3.new(1,1,1)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+
+UIS.InputBegan:Connect(function(i,g)
+    if not g and i.KeyCode == Enum.KeyCode.RightShift then
+        main.Visible = not main.Visible
+    end
+end)
